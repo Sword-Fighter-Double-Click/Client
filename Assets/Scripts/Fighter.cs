@@ -82,6 +82,8 @@ public abstract class Fighter : MonoBehaviour
     private float countBackDashDelay;
     private float walkPressTime = 0.35f;
     private float countWalkPressTime;
+    private float currentRunTime;
+
     //private FighterAudio fighterAudio;
 
     private Vector3 moveDirection;
@@ -459,6 +461,13 @@ public abstract class Fighter : MonoBehaviour
             run = 0;
             currentSpeed = status.speed;
             animator.SetBool("Run", false);
+            if ()
+            {
+                fighterAction = FighterAction.Dash;
+                velocity.x += (int)fighterPosition * -5;
+                animator.CrossFade("Dash", 0f);
+
+            }
         }
 
         if (Input.GetKeyDown(KeySetting.keys[fighterNumber, keyNumber]))
