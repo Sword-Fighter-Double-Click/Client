@@ -26,7 +26,7 @@
   <br>
 </details>
 
-<img width="700" alt="image" src="https://user-images.githubusercontent.com/80941288/230789744-d4c262cd-9d4a-48e5-becd-e26020b80979.png"><br>
+<img width="700" alt="image" src="https://github.com/Sword-Fighter-Double-Click/Client/assets/80941288/3219028f-6796-4f55-951b-21b1132cf92e"><br>
 
 <hr class='hr-solid'/>
 
