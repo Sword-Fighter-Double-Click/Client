@@ -55,7 +55,7 @@ public abstract class Fighter : MonoBehaviour
         Dash,
         Guard,
         Attack,
-        ChargedAttack,
+        StrongAttack,
         JumpAttack,
         AntiAirAttack,
         BackDashAttack,
@@ -712,7 +712,7 @@ public abstract class Fighter : MonoBehaviour
 
         if (Input.GetKeyDown(KeySetting.keys[fighterNumber, 5]))
         {
-            fighterAction = FighterAction.ChargedAttack;
+            fighterAction = FighterAction.StrongAttack;
 
             animator.CrossFade("StrongAttack", 0);
         }
