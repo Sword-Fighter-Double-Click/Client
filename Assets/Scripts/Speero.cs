@@ -36,8 +36,6 @@ public class Speero : Fighter
 				
 				SetPlayerVisible(1);
 				
-				OffUltimateScreen();
-				
 				// IDLE 상태로 초기화
 				fighterAction = FighterAction.None;
 			}

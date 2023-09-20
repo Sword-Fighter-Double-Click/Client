@@ -15,7 +15,7 @@ public abstract class Fighter : MonoBehaviour
         Dash,
         Guard,
         Attack,
-        ChargedAttack,
+        StrongAttack,
         JumpAttack,
         AntiAirAttack,
         BackDashAttack,
@@ -75,14 +75,12 @@ public abstract class Fighter : MonoBehaviour
     private bool canNextAttack;
     private int run;
     private int backDash;
-    private int backDashDirection;
     private float backDashMinTime = 0.45f;
     private float countBackDashMinTime;
     private float backDashDelay = 0.75f;
     private float countBackDashDelay;
     private float walkPressTime = 0.35f;
     private float countWalkPressTime;
-    private float currentRunTime;
 
     //private FighterAudio fighterAudio;
 
@@ -105,8 +103,6 @@ public abstract class Fighter : MonoBehaviour
     /// 적이 궁극기에 맞았는지를 저장하는 변수
     /// </summary>
     protected bool hitUltimate;
-
-    private GameObject ultimateScreenClone;
 
     private void Awake()
     {
@@ -168,7 +164,6 @@ public abstract class Fighter : MonoBehaviour
             if (SearchFighterWithinRange(skill.collider))
             {
                 // 적이 맞았다면
-
                 if (fighterAction == FighterAction.Ultimate)
                 {
                     hitUltimate = true;
@@ -374,25 +369,38 @@ public abstract class Fighter : MonoBehaviour
 
     #region Action
 
+	/// <summary>
+	/// CharacterController는 중력이 없기에 이를 추가하는 함수
+	/// </summary>
     private void Gravity()
     {
+		// isGround 값 설정
         isGround = characterController.isGrounded && velocity.y < 0;
 
+		// 하늘에서 떨어진 이후 땅에 닿았을 때
         if (isGround && velocity.y != -1)
         {
+			// 점프 했을 때와 구분하기 위해 velocity.y를 -1로 설정
             velocity.y = -1f;
+			// Fighter 상태 설정
             fighterAction = FighterAction.None;
+			// Animator 변수값 설정
             animator.SetBool("Grounded", true);
             animator.SetBool("Jump", false);
         }
+		// 땅에 닿지 않을 때
         else if (!isGround)
         {
+			// 중력의 3배 만큼의 값을 더함
             velocity.y += Physics.gravity.y * 3 * Time.deltaTime;
-            animator.SetBool("Grounded", false);
+            // Amimator 변수값 설정
+			animator.SetBool("Grounded", false);
         }
 
+		// velocity 값을 moveDirection에 적용
         moveDirection.y = velocity.y;
         moveDirection.x += velocity.x;
+		// velocity의 x값이 변동이 있을 시, 서서히 0이 되도록하는 구문
         if (velocity.x > 0)
         {
             velocity.x = Mathf.Clamp(velocity.x - 30 * Time.deltaTime, 0, float.MaxValue);
@@ -434,21 +442,36 @@ public abstract class Fighter : MonoBehaviour
         moveDirection = currentSpeed * facingDirection * Vector3.right;
     }
 
+	/// <summary>
+	/// Fighter 좌우 이동을 담당하는 함수
+	/// </summary>
     private void Turn()
     {
         // 이동 방향에 따라 이미지 방향 설정
         transform.eulerAngles = fighterPosition == FighterPosition.Left ? Vector3.zero : 180 * Vector3.up;
     }
 
+	/// <summary>
+	/// Fighter 달리기를 담당하는 함수
+	/// </summary>
     private void Run()
     {
-        if (facingDirection != 0 && -(int)fighterPosition != facingDirection)
+		/*
+		 1. 첫 번째 키가 입력되면 누른 시간 타이머 시작
+		 2. 두 번째 키를 입력 시, 타이머의 시간이 walkPressTime보다 짧으면
+		 3. 이동속도 증가 및 달리기 애니메이션 작동
+		 4. 달리기 상태에서 키를 떼면 기존 상태로 초기화
+		 */
+
+		// 좌우 키 동시 입력 시, 달리기 중단
+		if (facingDirection != 0 && -(int)fighterPosition != facingDirection)
         {
             run = 0;
             currentSpeed = status.speed;
             animator.SetBool("Run", false);
         }
 
+		// walkPressTime의 시간을 초과하면 달리기가 아닌 것으로 판단
         if (run == 1 && ((Time.time - countWalkPressTime) > walkPressTime))
         {
             run = 0;
@@ -456,30 +479,27 @@ public abstract class Fighter : MonoBehaviour
 
         int keyNumber = fighterPosition == FighterPosition.Left ? 3 : 1;
 
+		// 4
         if (run == 2 && Input.GetKeyUp(KeySetting.keys[fighterNumber, keyNumber]))
         {
             run = 0;
             currentSpeed = status.speed;
             animator.SetBool("Run", false);
-            if ()
-            {
-                fighterAction = FighterAction.Dash;
-                velocity.x += (int)fighterPosition * -5;
-                animator.CrossFade("Dash", 0f);
-
-            }
         }
 
         if (Input.GetKeyDown(KeySetting.keys[fighterNumber, keyNumber]))
         {
+			// 1
             if (run == 0)
             {
                 countWalkPressTime = Time.time;
                 run = 1;
             }
 
+			// 2
             else if (run == 1 && ((Time.time - countWalkPressTime) < walkPressTime))
             {
+				// 3
                 run = 2;
                 currentSpeed *= 1.5f;
 
@@ -488,14 +508,29 @@ public abstract class Fighter : MonoBehaviour
         }
     }
 
+	/// <summary>
+	/// Fighter의 백대시를 담당하는 함수
+	/// </summary>
     private void BackDash()
     {
-        if (countBackDashMinTime > 0)
+		/*
+		 1. 첫 번째 키가 입력되면 누른 시간 타이머 시작
+		 2. 두 번째 키를 입력 시, 타이머의 시간이 walkPressTime보다 짧으면 백대시로 판단
+		 3. 키를 떼면 Fighter 위치에 따른 좌우 이동 및 백대시 애니메이션 작동
+		 */
+
+		/* 
+		 백대시 애니메이션 최소 발동 시간 설정
+		 이유 : 애니메이션은 velocity.x가 0의 근사값이 되면 중지되도록 조건문이 설계되어 있음
+		        만약 벽에 붙어서 백대시를 하면 모션이 캔슬 될 수 있음
+		*/
+		if (countBackDashMinTime > 0)
         {
             countBackDashMinTime -= Time.deltaTime;
             animator.SetFloat("BackDashTime", countBackDashMinTime);
         }
 
+		// 좌우 키 동시 입력 시, 백 대시 중단
         if (facingDirection != 0 && (int)fighterPosition != facingDirection)
         {
             backDash = 0;
@@ -510,13 +545,15 @@ public abstract class Fighter : MonoBehaviour
             return;
         }
 
-        if (backDash > 0 && ((Time.time - countWalkPressTime) > walkPressTime))
+		// walkPressTime의 시간을 초과하면 백대시가 아닌 것으로 판단
+		if (backDash > 0 && ((Time.time - countWalkPressTime) > walkPressTime))
         {
             backDash = 0;
         }
 
         int keyNumber = fighterPosition == FighterPosition.Left ? 1 : 3;
 
+		// 3
         if (backDash == 2 && Input.GetKeyUp(KeySetting.keys[fighterNumber, keyNumber]))
         {
             backDash = 0;
@@ -529,12 +566,14 @@ public abstract class Fighter : MonoBehaviour
 
         if (Input.GetKeyDown(KeySetting.keys[fighterNumber, keyNumber]))
         {
+			// 1
             if (backDash == 0)
             {
                 countWalkPressTime = Time.time;
                 backDash = 1;
             }
 
+			// 2
             else if (backDash == 1 && ((Time.time - countWalkPressTime) < walkPressTime))
             {
                 backDash = 2;
@@ -633,7 +672,7 @@ public abstract class Fighter : MonoBehaviour
 
         if (Input.GetKeyDown(KeySetting.keys[fighterNumber, 5]))
         {
-            fighterAction = FighterAction.ChargedAttack;
+            fighterAction = FighterAction.StrongAttack;
 
             animator.CrossFade("StrongAttack", 0);
         }
@@ -657,11 +696,14 @@ public abstract class Fighter : MonoBehaviour
         }
     }
 
+	/// <summary>
+	/// 대공기
+	/// </summary>
     private void AntiAirAttack()
     {
         if (!canInput) return;
         if (!isGround) return;
-
+		// IDLE 상태에서만 함수 진입
         if (fighterAction != FighterAction.None) return;
 
         if (Input.GetKeyDown(KeySetting.keys[fighterNumber, 6]))
@@ -671,11 +713,14 @@ public abstract class Fighter : MonoBehaviour
         }
     }
 
+	/// <summary>
+	/// 백대시 후 공격
+	/// </summary>
     private void BackDashAttack()
     {
         if (!canInput) return;
         if (!isGround) return;
-
+		// 백대시 상태에서만 함수 진입
         if (fighterAction != FighterAction.Dash) return;
 
         if (Input.GetKeyDown(KeySetting.keys[fighterNumber, 4]))
@@ -717,8 +762,6 @@ public abstract class Fighter : MonoBehaviour
     private void Hit(float damage, bool isGuard, float facingDirection, float ultimateCantInputTime)
     {
         currentHP -= damage;
-
-        Vector2 knockBackPath = facingDirection * Vector2.right;
 
         // 가드 시 입력 불가와 넉백이 시간이 가드를 안했을 때보다 줄어듭니다.
         // 궁극기는 시전시간이 끝날 때까지 고정적으로 입력을 못하게 만듭니다.
@@ -794,24 +837,6 @@ public abstract class Fighter : MonoBehaviour
     //	fighterAudio.PlaySound("Landing");
     //	SpawnDustEffect(m_LandingDust);
     //}
-
-    /// <summary>
-    /// 궁극기 이미지 활성화
-    /// </summary>
-    protected void OnUltimateScreen()
-    {
-        //ultimateScreenClone = Instantiate(ultimateScreen);
-
-        //ultimateScreenClone.SetActive(true);
-    }
-
-    /// <summary>
-    /// 궁극기 이미지 비활성화
-    /// </summary>
-    protected void OffUltimateScreen()
-    {
-        //Destroy(ultimateScreenClone);
-    }
     #endregion
 
     #region HandleHitDetection
