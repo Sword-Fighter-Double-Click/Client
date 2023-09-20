@@ -966,6 +966,7 @@ public class FighterStatus
     public float guardKnockBackPower = 5;
 }
   ```
+</details><br>
 
 <b>FighterSkill</b><br>
 &nbsp;&nbsp;&nbsp;&nbsp;● Fighter의 스킬의 이름, 데미지, 판정 크기 등을 저장하는 데이터 클래스
@@ -985,6 +986,7 @@ public class FighterSkill
     public BoxCollider collider;
 }
   ```
+</details><br>
 
 <b>Speero</b><br>
 &nbsp;&nbsp;&nbsp;&nbsp;● Fighter 클래스를 상속하여 만든 캐릭터 스피로의 클래스입니다.<br>
