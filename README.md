@@ -948,6 +948,44 @@ public abstract class Fighter : MonoBehaviour
   ```
 </details><br>
 
+<b>FighterStatus</b><br>
+&nbsp;&nbsp;&nbsp;&nbsp;● Fighter의 체력, 이동속도, 점프 높이, 치명타 데미지 등 기본 스텟을 저장하는 데이터 클래스
+<details>
+    <summary><i>자세한 코드</i></summary>
+    
+  ```C#
+[System.Serializable]
+public class FighterStatus
+{
+    public float HP = 100;
+    public float ultimateGage = 0;
+    public float speed = 4.5f;
+    public float jumpForce = 7.5f;
+    public float counterDamageRate = 1.2f;
+    public float hitKnockBackPower = 10;
+    public float guardKnockBackPower = 5;
+}
+  ```
+
+<b>FighterSkill</b><br>
+&nbsp;&nbsp;&nbsp;&nbsp;● Fighter의 스킬의 이름, 데미지, 판정 크기 등을 저장하는 데이터 클래스
+<details>
+    <summary><i>자세한 코드</i></summary>
+    
+  ```C#
+using UnityEngine;
+
+[System.Serializable]
+public class FighterSkill
+{
+    public string name;
+    public float damage;
+    public float absorptionRate;
+    public bool colliderEnabled;
+    public BoxCollider collider;
+}
+  ```
+
 <b>Speero</b><br>
 &nbsp;&nbsp;&nbsp;&nbsp;● Fighter 클래스를 상속하여 만든 캐릭터 스피로의 클래스입니다.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;● 점프공격 위치 이동, 궁극기 사용 시의 애니메이션 오브젝트 생성 및 삭제 등의 기능이 있습니다.
