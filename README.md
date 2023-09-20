@@ -6,7 +6,7 @@
 
 <h4>게임 시연</h4>
 
-<A href="https://youtu.be/lCd6Kfqe1H8"> 게임 시연 영상 </A><br>
+<A href="https://youtu.be/XGrBrmSNWGs"> 게임 시연 영상 </A><br>
 
 <hr class='hr-solid'/>
 
@@ -26,7 +26,7 @@
   <br>
 </details>
 
-<img width="700" alt="image" src="https://github.com/Sword-Fighter-Double-Click/Client/assets/80941288/3219028f-6796-4f55-951b-21b1132cf92e"><br>
+<img width="700" alt="image" src="https://github.com/Sword-Fighter-Double-Click/Client/assets/80941288/c411ce9a-2de0-4b4d-a585-9872d650fb6c"><br>
 
 <hr class='hr-solid'/>
 
